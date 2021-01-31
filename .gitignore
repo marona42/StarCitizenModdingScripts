@@ -1,0 +1,9 @@
+convert.ini
+smartcat.ini
+__pycache__/
+global.ini
+global_original.ini
+global_P1.ini
+global_P2.ini
+*.xlsx
+.vscode/
