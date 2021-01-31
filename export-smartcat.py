@@ -174,7 +174,7 @@ def main(args):
         for id in exportDocumentIds:
             documentInfo = smartCAT_config.documentIds[id - 1]
             document_id = documentInfo[0] + '_' + smartCAT_config.languageId
-            result = export_multilang_csv(api.document, document_id, documentInfo[1])
+            result = export_target(api.document, document_id, documentInfo[1])
     except Exception as err:
         print('Error: Failed export: {0}'.format(err))
     except KeyboardInterrupt as err:
