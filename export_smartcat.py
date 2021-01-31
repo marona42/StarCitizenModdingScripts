@@ -48,10 +48,11 @@ class smartCatConfig:
             print(f"{documentIndex} - {documentPair[1]}")
             documentIndex = documentIndex + 1
 
-    def readDocumentIds(self):
+    def readDocumentIds(self,mode):
         if len(self.documentIds) > 1:
             self.printDocumentIds()
-            ids = set(map(int, filter(None, input("Enter export ids (optional): ").split(' '))))
+            if mode!='pullfs':  ids = set(map(int, filter(None, input("Enter export ids (optional): ").split(' '))))
+            else: ids=''
             if len(ids) == 0:
                 return set(range(1, len(self.documentIds) + 1))
             return [id for id in ids if id > 0 and id <= len(self.documentIds)];
@@ -108,8 +109,6 @@ def export_target(document_resource, document_id, output_file_name):
             return 1
         print('Export started')
         export_json = json.loads(export_result.text)
-        print("export info:")
-        print(export_json)
         export_task_id = export_json['id']
         wait_download_ready = False
         try:
@@ -120,7 +119,7 @@ def export_target(document_resource, document_id, output_file_name):
                             print('')
                         wait_download_ready = False
                         print('Download started')
-                        with open(output_file_name, 'wb') as out_file:
+                        with open(output_file_name+'.xlsx', 'wb') as out_file:
                             for chunk in download_result.iter_content(chunk_size=8192):
                                 out_file.write(chunk)
                         print('Download completed')
@@ -169,7 +168,7 @@ def main(args):
             return 1
         print("Use smartCAT config name - ", config_name)
         smartCAT_config = smartCatConfig(config[config_name])
-        exportDocumentIds = smartCAT_config.readDocumentIds()
+        exportDocumentIds = smartCAT_config.readDocumentIds(args[0])
         api = SmartCAT(smartCAT_config.accountId, smartCAT_config.authKey, SmartCAT.SERVER_EUROPE)
         for id in exportDocumentIds:
             documentInfo = smartCAT_config.documentIds[id - 1]
@@ -181,7 +180,8 @@ def main(args):
         print('Interrupted')
     if result == 0:
         print('Done')
-    return result
+    if args[0] == 'pullfs': return 
+    else: return result
 
 if __name__ == "__main__":
     sys.exit(main(sys.argv))
