@@ -2,8 +2,11 @@ convert.ini
 smartcat.ini
 __pycache__/
 global.ini
+global_ref.ini
+global_ref_ptu.ini
 global_original.ini
 global_P1.ini
 global_P2.ini
 *.xlsx
+*.log
 .vscode/
