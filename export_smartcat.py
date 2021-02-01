@@ -180,7 +180,7 @@ def main(args):
         print('Interrupted')
     if result == 0:
         print('Done')
-    if args[0] == 'pullfs': return 
+    if args[0] == 'pullfs': return smartCAT_config.documentIds
     else: return result
 
 if __name__ == "__main__":
