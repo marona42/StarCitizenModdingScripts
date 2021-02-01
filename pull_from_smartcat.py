@@ -34,6 +34,7 @@ origindata.optionxform=str
 origindata.read_string(config_string)
 
 with open('global_pull.ini','w') as f:
+    f.write('\ufeff')       #UTF8 with BOM
     for keyword in origindata['DEFAULT']:
         if '﻿' in keyword: keyword = keyword.replace("﻿","")
         if keyword in transdata:
