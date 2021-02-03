@@ -27,14 +27,14 @@ for doc in docs:
         transdata[inkey]=indata
 
 
-with open('global_ref.ini', 'r') as f:
+with open('global_ref.ini', 'r',encoding='utf​-8-sig') as f:
     config_string = '[DEFAULT]\n' + f.read()
 origindata = configparser.ConfigParser(delimiters='=',strict=True,interpolation=None)
 origindata.optionxform=str
 origindata.read_string(config_string)
 
-with open('global_pull.ini','w') as f:
-    f.write('\ufeff')       #UTF8 with BOM
+with open('global_pull.ini','w',encoding='utf​-8-sig') as f:
+    #f.write('\ufeff')       #UTF8 with BOM
     for keyword in origindata['DEFAULT']:
         if '﻿' in keyword: keyword = keyword.replace("﻿","")
         if keyword in transdata:
