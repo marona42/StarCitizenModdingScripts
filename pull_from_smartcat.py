@@ -45,7 +45,7 @@ with open('global_pull.ini','w',encoding='utf​-8-sig') as f:
             f.write(keyword+'='+origindata['DEFAULT'][keyword]+'\n')
             nodata+=1
 
-with open('depreciated_keywords.txt','w') as f:
+with open('depreciated_keywords.log','w') as f:
     for keyword in transdata:
         if keyword not in origindata['DEFAULT']:
             f.write(f"keyword '{keyword}' is not used at original .ini file anymore.\n")
