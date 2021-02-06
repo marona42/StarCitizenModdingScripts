@@ -8,6 +8,7 @@ global_original.ini
 global_pull.ini
 global_P1.ini
 global_P2.ini
+global_*.ini
 depreciated_keywords.txt
 *.xlsx
 *.log

@@ -10,7 +10,7 @@ docs = export_smartcat.main(['pullfs',config_title]) #[[doc id,이름],...]
 log = open('pull.log','w')
 
 transdata={}
-overwrited,nodata=0,0
+overwrited,nodata,excluded=0,0,0
 for doc in docs:
     if len(docs) > 1:
         print(f"Reading {doc[1]}")
@@ -38,11 +38,15 @@ with open('global_pull.ini','w',encoding='utf​-8-sig') as f:
     for keyword in origindata['DEFAULT']:
         if '﻿' in keyword: keyword = keyword.replace("﻿","")
         if keyword in transdata:
+            #if not transdata[keyword].isascii():                #for calculate progress
             f.write(keyword+'='+transdata[keyword]+'\n')
         else:
             #print(f"Warning : No translated data of '{keyword}', write original data instead.")
-            log.write(f"Warning : No translated data of '{keyword}', write original data instead.\n")
             f.write(keyword+'='+origindata['DEFAULT'][keyword]+'\n')
+            if '[PH]' in origindata['DEFAULT'][keyword] or 'WIP' in origindata['DEFAULT'][keyword] or '*DELETE THIS*' in origindata['DEFAULT'][keyword] :
+                excluded+=1
+                continue
+            log.write(f"Warning : No translated data of '{keyword}', write original data instead.\n")
             nodata+=1
 
 with open('depreciated_keywords.log','w') as f:
@@ -51,6 +55,6 @@ with open('depreciated_keywords.log','w') as f:
             f.write(f"keyword '{keyword}' is not used at original .ini file anymore.\n")
 
 if overwrited+nodata>1:
-    print(f"Merge done with {overwrited} overwritten, {nodata} original data uses")
+    print(f"Merge done with {overwrited} overwritten, {nodata} original data uses, {excluded} placeholders")
 else:
-    print("Merge successfully done")
+    print(f"Merge successfully done with skipping {excluded} placeholders")
