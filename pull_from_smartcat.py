@@ -1,5 +1,6 @@
 # pull from smartcat project.
 # requires export-smartcat.py, smartcat.ini
+import os
 import configparser
 import openpyxl as xl     #pip install openpyxl needed!
 import export_smartcat
@@ -19,6 +20,7 @@ for doc in docs:
     for rowd in ws.rows:
         #print(rowd[0].value)
         if len(rowd)>1: print(f"Warning: multi row detected in {rowd}")
+        if '=' not in rowd[0].value: print(f"Warning: {rowd[0].value}")
         (inkey,indata) = rowd[0].value.split('=',1)
         if inkey in transdata != None:
             #print(f"Warning: overwrite duplicated keyword in {rowd}({inkey}) : {transdata[inkey]}")
@@ -32,6 +34,9 @@ with open('global_ref.ini', 'r',encoding='utf​-8-sig') as f:
 origindata = configparser.ConfigParser(delimiters='=',strict=True,interpolation=None)
 origindata.optionxform=str
 origindata.read_string(config_string)
+
+if os.path.exists("global_pull.ini"):
+    os.rename('global_pull.ini','global_pull_old.ini')
 
 with open('global_pull.ini','w',encoding='utf​-8-sig') as f:
     #f.write('\ufeff')       #UTF8 with BOM
