@@ -10,7 +10,7 @@ docs = export_smartcat.main(['pullfs',config_title]) #[[doc id,이름],...]
 
 log = open('pull.log','w')
 
-transdata={}
+transdata,phdata={},{}
 overwrited,nodata,excluded=0,0,0
 for doc in docs:
     if len(docs) > 1:
@@ -35,6 +35,18 @@ origindata = configparser.ConfigParser(delimiters='=',strict=True,interpolation=
 origindata.optionxform=str
 origindata.read_string(config_string)
 
+with open('PHkeywords.ini', 'r',encoding='utf​-8-sig') as f:
+    config_string = '[DEFAULT]\n' + f.read()
+phdata = configparser.ConfigParser(delimiters='=',strict=True,interpolation=None)
+phdata.optionxform=str
+phdata.read_string(config_string)
+
+with open('manualkeywords.ini', 'r',encoding='utf​-8-sig') as f:
+    config_string = '[DEFAULT]\n' + f.read()
+mndata = configparser.ConfigParser(delimiters='=',strict=True,interpolation=None)
+mndata.optionxform=str
+mndata.read_string(config_string)
+
 if os.path.exists("global_pull.ini"):
     os.rename('global_pull.ini','global_pull_old.ini')
 
@@ -45,14 +57,26 @@ with open('global_pull.ini','w',encoding='utf​-8-sig') as f:
         if keyword in transdata:
             #if not transdata[keyword].isascii():                #for calculate progress
             f.write(keyword+'='+transdata[keyword]+'\n')
-        else:
+        else:   #doesn't exist in smartcat data
             #print(f"Warning : No translated data of '{keyword}', write original data instead.")
-            f.write(keyword+'='+origindata['DEFAULT'][keyword]+'\n')
+            if keyword in phdata['DEFAULT']:    #check if data exist in PHKeywords.ini
+                f.write(keyword+'='+phdata['DEFAULT'][keyword]+'\n')
+                continue
+            else:
+                f.write(keyword+'='+origindata['DEFAULT'][keyword]+'\n')
             if '[PH]' in origindata['DEFAULT'][keyword] or 'WIP' in origindata['DEFAULT'][keyword] or '*DELETE THIS*' in origindata['DEFAULT'][keyword] :
                 excluded+=1
                 continue
             log.write(f"Warning : No translated data of '{keyword}', write original data instead.\n")
             nodata+=1
+
+    for keyword in mndata['DEFAULT']:
+        if keyword in transdata['DEFAULT']:
+            print(f"{keyword} is already exist in translated data")
+        else:
+            f.write(keyword+'='+mndata[keyword]+'\n')
+
+
 
 with open('depreciated_keywords.log','w') as f:
     for keyword in transdata:
