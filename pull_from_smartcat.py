@@ -71,10 +71,10 @@ with open('global_pull.ini','w',encoding='utf​-8-sig') as f:
             nodata+=1
 
     for keyword in mndata['DEFAULT']:
-        if keyword in transdata['DEFAULT']:
+        if keyword in transdata:
             print(f"{keyword} is already exist in translated data")
         else:
-            f.write(keyword+'='+mndata[keyword]+'\n')
+            f.write(keyword+'='+mndata['DEFAULT'][keyword]+'\n')
 
 
 
