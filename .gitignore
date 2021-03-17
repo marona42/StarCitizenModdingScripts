@@ -1,6 +1,8 @@
 convert.ini
 smartcat.ini
 __pycache__/
+EPICS/
+old_ini/
 global.ini
 global_ref.ini
 global_ref_ptu.ini
@@ -13,3 +15,4 @@ depreciated_keywords.txt
 *.xlsx
 *.log
 .vscode/
+2350.txt
