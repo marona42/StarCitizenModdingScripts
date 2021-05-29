@@ -17,11 +17,15 @@ for doc in docs:
         print(f"Reading {doc[1]}")
     wd= xl.load_workbook(doc[1]+'.xlsx',read_only=True)
     ws = wd.active
-    for rowd in ws.rows:
+    for rowd in ws.iter_rows(min_row=2):
         #print(rowd[0].value)
-        if len(rowd)>1: print(f"Warning: multi row detected in {rowd}")
-        if '=' not in rowd[0].value: print(f"Warning: {rowd[0].value}")
-        (inkey,indata) = rowd[0].value.split('=',1)
+        if len(rowd)>2: print(f"Warning: multiple rows detected in {rowd}")
+        if rowd[1].value is None:
+            if '=' not in rowd[0].value: print(f"Warning: {rowd[0].value}")
+            (inkey,indata) = rowd[0].value.split('=',1)
+        else:
+            if '=' not in rowd[1].value: print(f"Warning: {rowd[1].value}")
+            (inkey,indata) = rowd[1].value.split('=',1)
         if inkey in transdata != None:
             #print(f"Warning: overwrite duplicated keyword in {rowd}({inkey}) : {transdata[inkey]}")
             log.write(f"Warning: overwrite duplicated keyword in {rowd}({inkey}) : {transdata[inkey]}\n")
