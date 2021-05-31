@@ -20,12 +20,11 @@ for doc in docs:
     for rowd in ws.iter_rows(min_row=2):
         #print(rowd[0].value)
         if len(rowd)>2: print(f"Warning: multiple rows detected in {rowd}")
-        if rowd[1].value is None:
-            if '=' not in rowd[0].value: print(f"Warning: {rowd[0].value}")
-            (inkey,indata) = rowd[0].value.split('=',1)
-        else:
+        if rowd[1].value is not None:
             if '=' not in rowd[1].value: print(f"Warning: {rowd[1].value}")
             (inkey,indata) = rowd[1].value.split('=',1)
+        else:
+            continue
         if inkey in transdata != None:
             #print(f"Warning: overwrite duplicated keyword in {rowd}({inkey}) : {transdata[inkey]}")
             log.write(f"Warning: overwrite duplicated keyword in {rowd}({inkey}) : {transdata[inkey]}\n")
@@ -76,18 +75,20 @@ with open('global_pull.ini','w',encoding='utf​-8-sig') as f:
 
     for keyword in mndata['DEFAULT']:
         if keyword in transdata:
-            print(f"{keyword} is already exist in translated data")
+            print(f"manual input keyword '{keyword}' is already exist in translated data")
         else:
             f.write(keyword+'='+mndata['DEFAULT'][keyword]+'\n')
 
-
-
+decnt=0
 with open('depreciated_keywords.log','w') as f:
     for keyword in transdata:
         if keyword not in origindata['DEFAULT']:
             f.write(f"keyword '{keyword}' is not used at original .ini file anymore.\n")
+            decnt+=1
 
 if overwrited+nodata>1:
     print(f"Merge done with {overwrited} overwritten, {nodata} original data uses, {excluded} placeholders")
 else:
     print(f"Merge successfully done with skipping {excluded} placeholders")
+if decnt>0:
+    print("There are depreciated keywords on translated data. please check depreciated_keywords.log file.")
