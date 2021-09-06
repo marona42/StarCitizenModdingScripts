@@ -3,6 +3,8 @@ smartcat.ini
 __pycache__/
 EPICS/
 old_ini/
+legacy/
+TODO.ini
 global.ini
 global_ref.ini
 global_ref_ptu.ini
