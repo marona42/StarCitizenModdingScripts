@@ -12,7 +12,6 @@ class ConversionProject:
         self.modseg=[]
         self._load_config()
         self.refinidata=self._load_ini(self.refname)
-        print(self.refinidata)
         if self.fillmode :
             print(f"{self.__econfig['update']['dataini']} file found! fill translated data...")
             self.filldata = self._load_ini(self.__econfig['update']['dataini'])     #load translated ini file
@@ -41,7 +40,7 @@ class ConversionProject:
 
             if any(tmp in self.refinidata[keyword] for tmp in self.excludewords) or self.refinidata[keyword]=='': continue    #exclude including excludekeywords and empty segments
 
-            if self.patchmode:
+            if self.patchmode:#FIXME: 로직검토
                 if keyword in self.prevrefdata and self.prevrefdata[keyword] != self.refinidata[keyword]:
                     self.modseg.append(xlswb[widx][-1].active.max_row) #FIXME: 어느 도큐의 번호인지?
                 if keyword not in self.prevrefdata:
