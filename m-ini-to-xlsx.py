@@ -35,14 +35,15 @@ class ConversionProject:
         for wb in xlswb: wb[-1].active.append(["context","en",self.__econfig['convert']['targetlang']])   #write initial first row
 
         for keyword in self.refinidata:
-            if any(keyword.startswith(tmp) for tmp in self.splitkeys ): widx=1
+            #if any(keyword.startswith(tmp) for tmp in self.splitkeys ): widx=1
+            if keyword.startswith(self.splitkeys): widx=1
             else : widx=0  #determine which document to write  (primary: 0/ alt: 1)
 
-            if any(tmp in self.refinidata[keyword] for tmp in self.excludewords) or self.refinidata[keyword]=='': continue    #exclude including excludekeywords and empty segments
+            if self.refinidata[keyword]=='' or any(tmp in self.refinidata[keyword] for tmp in self.excludewords): continue    #exclude including excludekeywords and empty segments
 
             if self.patchmode:
                 if keyword in self.prevrefdata and self.prevrefdata[keyword] != self.refinidata[keyword]:
-                    self.modseg[widx][-1].append(xlswb[widx][-1].active.max_row) #FIXME: 어느 도큐의 번호인지?
+                    self.modseg[widx][-1].append(xlswb[widx][-1].active.max_row)
                 if keyword not in self.prevrefdata:
                     self.newseg[widx][-1].append(xlswb[widx][-1].active.max_row)
                     if keyword in self.mnsegdat: #TODO: 로그파일로 출력
@@ -67,6 +68,9 @@ class ConversionProject:
         print(f"\nwrite done xlsx {len(xlswb[0])}+{len(xlswb[1])} files.")
         if self.patchmode:
             print("write log files...")
+            with open("segments_new.log","w") as f: f.write("")
+            with open("segments_modified.log","w") as f: f.write("")
+            
             self.write_info("segments_new","\t\tnew segments","")
             for docuidx in range(len(self.newseg[0])):
                 self.write_info("segments_new",f"\n\t{self.resname[0]}_P{docuidx}",self.newseg[0][docuidx])
@@ -81,8 +85,11 @@ class ConversionProject:
 
     def write_info(self,filename,title,dat):
         with open(filename+".log","a") as f:
-            f.write(title+'\n')
-            if dat == "": return
+            if dat == "":
+                f.write(f"{title}\n")
+                return
+            else:
+                f.write(f"{title} - {len(dat)} items\n")
             prevnum,isseq=0,False
             for segnum in dat:
                 if segnum-prevnum != 1:
@@ -109,7 +116,7 @@ class ConversionProject:
         self._placeholdersegfname = self.__econfig['update']['phseg']
 
         self.excludewords = list(self.__econfig['parse']['excludekeywords'].split(','))
-        self.splitkeys    = list(self.__econfig['parse']['splitsegment'].split(','))
+        self.splitkeys    = tuple(self.__econfig['parse']['splitsegment'].split(','))
 
     def _load_ini(self,filename):
         with open(filename, 'r',encoding='utf​-8-sig') as f:
