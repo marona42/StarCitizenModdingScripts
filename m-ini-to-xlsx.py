@@ -8,8 +8,8 @@ class ConversionProject:
         if(not os.path.isfile(configname)): raise FileNotFoundError(f"essential config file '{configname}' Not found. aborting...")
         self.refinidata=None
         self.filldata=None
-        self.newseg=[]
-        self.modseg=[]
+        self.newseg=[[[]],[[]]]
+        self.modseg=[[[]],[[]]]
         self._load_config()
         self.refinidata=self._load_ini(self.refname)
         if self.fillmode :
@@ -40,11 +40,11 @@ class ConversionProject:
 
             if any(tmp in self.refinidata[keyword] for tmp in self.excludewords) or self.refinidata[keyword]=='': continue    #exclude including excludekeywords and empty segments
 
-            if self.patchmode:#FIXME: 로직검토
+            if self.patchmode:
                 if keyword in self.prevrefdata and self.prevrefdata[keyword] != self.refinidata[keyword]:
-                    self.modseg.append(xlswb[widx][-1].active.max_row) #FIXME: 어느 도큐의 번호인지?
+                    self.modseg[widx][-1].append(xlswb[widx][-1].active.max_row) #FIXME: 어느 도큐의 번호인지?
                 if keyword not in self.prevrefdata:
-                    self.newseg.append(xlswb[widx][-1].active.max_row)
+                    self.newseg[widx][-1].append(xlswb[widx][-1].active.max_row)
                     if keyword in self.mnsegdat: #TODO: 로그파일로 출력
                         print(f'please check {keyword} at {self._manualsegfname}')
                     if keyword in self.phsegdat:
@@ -58,21 +58,42 @@ class ConversionProject:
             if xlswb[widx][-1].active.max_row > self.doculimit:
                 xlswb[widx][-1].save(filename=self.resname[widx]+f"_P{len(xlswb[widx])}.xlsx")
                 xlswb[widx].append(xl.workbook.Workbook())
+                self.modseg[widx][-1].append([])
+                self.newseg[widx][-1].append([])
 
             if xlswb[widx][-1].active.max_row % dot == 0: print(".",end="",flush=True)
 
         for i in range(2): xlswb[i][-1].save(filename=self.resname[i]+f"_P{len(xlswb[i])}.xlsx")
+        print(f"\nwrite done xlsx {len(xlswb[0])}+{len(xlswb[1])} files.")
+        if self.patchmode:
+            print("write log files...")
+            self.write_info("segments_new","\t\tnew segments","")
+            for docuidx in range(len(self.newseg[0])):
+                self.write_info("segments_new",f"\n\t{self.resname[0]}_P{docuidx}",self.newseg[0][docuidx])
+            for docuidx in range(len(self.newseg[1])):
+                self.write_info("segments_new",f"\n\t{self.resname[1]}_P{docuidx}",self.newseg[1][docuidx])
 
-        if self.patchmode and False:#FIXME: 한시적 봉인
-            self.write_info("segments_new.log",self.newseg)
-            self.write_info("segments_modified.log",self.modseg)
+            self.write_info("segments_modified","\t\tmodified segments","")
+            for docuidx in range(len(self.modseg[0])):
+                self.write_info("segments_modified",f"\n\t{self.resname[0]}_P{docuidx}",self.modseg[0][docuidx])
+            for docuidx in range(len(self.modseg[1])):
+                self.write_info("segments_modified",f"\n\t{self.resname[1]}_P{docuidx}",self.modseg[1][docuidx])
 
-
-    def write_info(self,filename,dat):
-        #FIXME: 연속된 숫자는 하이픈으로 잇기
-        with open(filename+".log","w") as f:
+    def write_info(self,filename,title,dat):
+        with open(filename+".log","a") as f:
+            f.write(title+'\n')
+            if dat == "": return
+            prevnum,isseq=0,False
             for segnum in dat:
-                f.write(str(segnum)+'\n')
+                if segnum-prevnum != 1:
+                    if isseq:
+                        f.write(f"-{prevnum}")
+                    f.write(f"\n{segnum}")
+                    isseq=False
+                else:
+                    isseq=True
+                prevnum=segnum
+
 
     def _load_config(self):
         self.__econfig = configparser.ConfigParser(delimiters='=',strict=True,interpolation=None)
