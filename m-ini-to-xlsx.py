@@ -32,10 +32,10 @@ class ConversionProject:
     def write_xlsx(self,dot=100):
         print("write start")
         xlswb=[[xl.workbook.Workbook()],[xl.workbook.Workbook()]]   #primary, alt
+        xlscnt=[0,0]
         for wb in xlswb: wb[-1].active.append(["context","en",self.__econfig['convert']['targetlang']])   #write initial first row
 
         for keyword in self.refinidata:
-            #if any(keyword.startswith(tmp) for tmp in self.splitkeys ): widx=1
             if keyword.startswith(self.splitkeys): widx=1
             else : widx=0  #determine which document to write  (primary: 0/ alt: 1)
 
@@ -43,9 +43,9 @@ class ConversionProject:
 
             if self.patchmode:
                 if keyword in self.prevrefdata and self.prevrefdata[keyword] != self.refinidata[keyword]:
-                    self.modseg[widx][-1].append(xlswb[widx][-1].active.max_row)
+                    self.modseg[widx][-1].append(xlscnt[widx])
                 if keyword not in self.prevrefdata:
-                    self.newseg[widx][-1].append(xlswb[widx][-1].active.max_row)
+                    self.newseg[widx][-1].append(xlscnt[widx])
                     if keyword in self.mnsegdat: #TODO: 로그파일로 출력
                         print(f'please check {keyword} at {self._manualsegfname}')
                     if keyword in self.phsegdat:
@@ -55,14 +55,17 @@ class ConversionProject:
                 xlswb[widx][-1].active.append([keyword,self.refinidata[keyword],self.filldata[keyword]])
             else: 
                 xlswb[widx][-1].active.append([keyword,self.refinidata[keyword]])
+            xlscnt[widx]+=1
 
-            if xlswb[widx][-1].active.max_row > self.doculimit:
+            if xlscnt[widx] > self.doculimit:
                 xlswb[widx][-1].save(filename=self.resname[widx]+f"_P{len(xlswb[widx])}.xlsx")
                 xlswb[widx].append(xl.workbook.Workbook())
+                xlswb[widx][-1].append(["context","en",self.__econfig['convert']['targetlang']])
                 self.modseg[widx][-1].append([])
                 self.newseg[widx][-1].append([])
+                xlscnt[widx]=0
 
-            if xlswb[widx][-1].active.max_row % dot == 0: print(".",end="",flush=True)
+            if xlscnt[widx]% dot == 0: print(".",end="",flush=True)
 
         for i in range(2): xlswb[i][-1].save(filename=self.resname[i]+f"_P{len(xlswb[i])}.xlsx")
         print(f"\nwrite done xlsx {len(xlswb[0])}+{len(xlswb[1])} files.")
@@ -70,7 +73,7 @@ class ConversionProject:
             print("write log files...")
             with open("segments_new.log","w") as f: f.write("")
             with open("segments_modified.log","w") as f: f.write("")
-            
+
             self.write_info("segments_new","\t\tnew segments","")
             for docuidx in range(len(self.newseg[0])):
                 self.write_info("segments_new",f"\n\t{self.resname[0]}_P{docuidx}",self.newseg[0][docuidx])
