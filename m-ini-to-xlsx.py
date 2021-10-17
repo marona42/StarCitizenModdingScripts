@@ -32,7 +32,7 @@ class ConversionProject:
     def write_xlsx(self,dot=100):
         print("write start")
         xlswb=[[xl.workbook.Workbook()],[xl.workbook.Workbook()]]   #primary, alt
-        xlscnt=[0,0]
+        xlscnt=[1,1]
         for wb in xlswb: wb[-1].active.append(["context","en",self.__econfig['convert']['targetlang']])   #write initial first row
 
         for keyword in self.refinidata:
@@ -46,6 +46,7 @@ class ConversionProject:
                     self.modseg[widx][-1].append(xlscnt[widx])
                 if keyword not in self.prevrefdata:
                     self.newseg[widx][-1].append(xlscnt[widx])
+                    print(f"new seg {xlscnt[widx]} : {keyword}")
                     if keyword in self.mnsegdat: #TODO: 로그파일로 출력
                         print(f'please check {keyword} at {self._manualsegfname}')
                     if keyword in self.phsegdat:
@@ -61,8 +62,8 @@ class ConversionProject:
                 xlswb[widx][-1].save(filename=self.resname[widx]+f"_P{len(xlswb[widx])}.xlsx")
                 xlswb[widx].append(xl.workbook.Workbook())
                 xlswb[widx][-1].append(["context","en",self.__econfig['convert']['targetlang']])
-                self.modseg[widx][-1].append([])
-                self.newseg[widx][-1].append([])
+                self.modseg[widx].append([])
+                self.newseg[widx].append([])
                 xlscnt[widx]=0
 
             if xlscnt[widx]% dot == 0: print(".",end="",flush=True)
@@ -76,17 +77,17 @@ class ConversionProject:
 
             self.write_info("segments_new","\t\tnew segments","")
             for docuidx in range(len(self.newseg[0])):
-                self.write_info("segments_new",f"\n\t{self.resname[0]}_P{docuidx}",self.newseg[0][docuidx])
+                self.write_info("segments_new",f"\n\t{self.resname[0]}_P{docuidx}",self.newseg[0][docuidx],xlswb[0][docuidx])
             for docuidx in range(len(self.newseg[1])):
-                self.write_info("segments_new",f"\n\t{self.resname[1]}_P{docuidx}",self.newseg[1][docuidx])
+                self.write_info("segments_new",f"\n\t{self.resname[1]}_P{docuidx}",self.newseg[1][docuidx],xlswb[1][docuidx])
 
             self.write_info("segments_modified","\t\tmodified segments","")
             for docuidx in range(len(self.modseg[0])):
-                self.write_info("segments_modified",f"\n\t{self.resname[0]}_P{docuidx}",self.modseg[0][docuidx])
+                self.write_info("segments_modified",f"\n\t{self.resname[0]}_P{docuidx}",self.modseg[0][docuidx],xlswb[0][docuidx])
             for docuidx in range(len(self.modseg[1])):
-                self.write_info("segments_modified",f"\n\t{self.resname[1]}_P{docuidx}",self.modseg[1][docuidx])
+                self.write_info("segments_modified",f"\n\t{self.resname[1]}_P{docuidx}",self.modseg[1][docuidx],xlswb[1][docuidx])
 
-    def write_info(self,filename,title,dat):
+    def write_info(self,filename,title,dat,keyworddic=None):
         with open(filename+".log","a") as f:
             if dat == "":
                 f.write(f"{title}\n")
@@ -97,12 +98,14 @@ class ConversionProject:
             for segnum in dat:
                 if segnum-prevnum != 1:
                     if isseq:
-                        f.write(f"-{prevnum}")
-                    f.write(f"\n{segnum}")
+                        f.write(f" - {prevnum}")
+                    f.write(f"\n{segnum}: ( {keyworddic.active['A'+str(segnum+1)].value} )")
                     isseq=False
                 else:
                     isseq=True
                 prevnum=segnum
+            if isseq: f.write(f" - {prevnum}")
+            f.write("\n\n")
 
 
     def _load_config(self):
