@@ -26,7 +26,7 @@ def main(args):
         wd = xl.load_workbook(doc[1]+'.xlsx',read_only=True,data_only=True)
         ws = wd.active
         for rowd in ws.iter_rows(min_row=2):    #starts with 2nd row
-            if len(rowd)>3: print(f"Warning: irregular rows detected in {rowd}")
+            if len(rowd)>4: print(f"Warning: irregular rows detected in {rowd}")
 
             inkey,insource,intarg = rowd[0].value,rowd[1].value,rowd[2].value
             if inkey in transdata != None:
