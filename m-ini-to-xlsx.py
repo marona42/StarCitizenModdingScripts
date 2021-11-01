@@ -33,7 +33,7 @@ class ConversionProject:
         print("write start")
         xlswb=[[xl.workbook.Workbook()],[xl.workbook.Workbook()]]   #primary, alt
         xlscnt=[1,1]
-        for wb in xlswb: wb[-1].active.append(["context","en",self.__econfig['convert']['targetlang']])   #write initial first row
+        for wb in xlswb: wb[-1].active.append(["context","en",self.__econfig['convert']['targetlang'],"comments"])   #write initial first row
 
         for keyword in self.refinidata:
             if keyword.startswith(self.splitkeys): widx=1
@@ -41,21 +41,29 @@ class ConversionProject:
 
             if self.refinidata[keyword]=='' or any(tmp in self.refinidata[keyword] for tmp in self.excludewords): continue    #exclude including excludekeywords and empty segments
 
-            if self.patchmode:
+            if self.patchmode:#FIXME: 오차 있음 
                 if keyword in self.prevrefdata and self.prevrefdata[keyword] != self.refinidata[keyword]:
                     self.modseg[widx][-1].append(xlscnt[widx])
                 if keyword not in self.prevrefdata:
                     self.newseg[widx][-1].append(xlscnt[widx])
-                    print(f"new seg {xlscnt[widx]} : {keyword}")
+                    #print(f"new seg {xlscnt[widx]} : {keyword}")
                     if keyword in self.mnsegdat: #TODO: 로그파일로 출력
                         print(f'please check {keyword} at {self._manualsegfname}')
                     if keyword in self.phsegdat:
                         print(f'please check {keyword} at {self._placeholdersegfname}')
 
             if self.fillmode and keyword in self.filldata:
-                xlswb[widx][-1].active.append([keyword,self.refinidata[keyword],self.filldata[keyword]])
-            else: 
-                xlswb[widx][-1].active.append([keyword,self.refinidata[keyword]])
+                if self.filldata[keyword].startswith("'"): self.filldata[keyword] = "'" + self.filldata[keyword] #'로 시작하는 거 하나 더 붙여주기
+                if len(self.modseg[widx][-1]) != 0 and self.modseg[widx][-1][-1]==xlscnt[widx]:
+                    xlswb[widx][-1].active.append([keyword,self.refinidata[keyword],self.filldata[keyword],"modified"])
+                else:
+                    xlswb[widx][-1].active.append([keyword,self.refinidata[keyword],self.filldata[keyword]])
+            else:
+                if len(self.modseg[widx][-1]) != 0 and self.modseg[widx][-1][-1]==xlscnt[widx]:
+                    xlswb[widx][-1].active.append([keyword,self.refinidata[keyword],"","modified"])
+                elif len(self.newseg[widx][-1]) != 0 and self.newseg[widx][-1][-1]==xlscnt[widx]:
+                    xlswb[widx][-1].active.append([keyword,self.refinidata[keyword],"","new"])
+                else: xlswb[widx][-1].active.append([keyword,self.refinidata[keyword]])
             xlscnt[widx]+=1
 
             if xlscnt[widx] > self.doculimit:
