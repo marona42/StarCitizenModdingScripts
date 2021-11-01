@@ -9,7 +9,7 @@ def main(args):
     else:
         smartcat_config=configparser.ConfigParser(delimiters='=',strict=True,interpolation=None)
         smartcat_config.read('smartcat.ini')
-        docs=[smartcat_config['sc_ko_m']['documentId_1'].split(',')]
+        docs=[smartcat_config['sc_ko_m']['documentId_1'].split(','),smartcat_config['sc_ko_m']['documentId_2'].split(',')]
 
     log = open('mpull.log','w')
 
@@ -56,7 +56,6 @@ def main(args):
 
     if os.path.exists("global_pull.ini"):
         os.rename('global_pull.ini','global_pull_old.ini')
-
     with open('global_pull.ini','w',encoding='utf​-8-sig') as f:
         for keyword in origindata['DEFAULT']:
             if '﻿' in keyword: keyword = keyword.replace("﻿","")
