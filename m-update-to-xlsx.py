@@ -2,19 +2,20 @@ import sys
 import os.path
 import configparser
 import openpyxl as xl     #pip install openpyxl needed!
-
 class ConversionProject:
     def __init__(self,configname):
         if(not os.path.isfile(configname)): raise FileNotFoundError(f"essential config file '{configname}' Not found. aborting...")
         self.refinidata=None
-        self.filldata=None
+        self.filldata={}
         self.newseg=[[[]],[[]]]
         self.modseg=[[[]],[[]]]
         self._load_config()
         self.refinidata=self._load_ini(self.refname)
-        if self.fillmode :
-            print(f"{self.__econfig['update']['dataini']} file found! fill translated data...")
-            self.filldata = self._load_ini(self.__econfig['update']['dataini'])     #load translated ini file
+        if self.fillmode :  #FIXME: not ini, xlsx!
+            print(f"{self.__econfig['update']['dataxlsx']} file found! fill translated data...")
+            for tmp in self.tfilename:
+                self.filldata.update(self._load_xlsx(tmp))
+           # self.filldata = self._load_xlsx(self.__econfig['update']['dataxlsx'])+     #load translated xlsx file
             print("translated data read done")
         if self.patchmode:
             print(f"{self.__econfig['update']['newrefini']} file found! use this file instead...")
@@ -39,7 +40,8 @@ class ConversionProject:
             if keyword.startswith(self.splitkeys): widx=1
             else : widx=0  #determine which document to write  (primary: 0/ alt: 1)
 
-            if self.refinidata[keyword]=='' or any(tmp in self.refinidata[keyword] for tmp in self.excludewords): continue    #exclude including excludekeywords and empty segments
+            if self.refinidata[keyword]=='' or any(tmp in self.refinidata[keyword] for tmp in self.excludewords)\
+                or any(keyword.startswith(tmp) for tmp in self.excludesegs): continue    #exclude including excludekeywords/segs and empty segments
 
             if self.patchmode:#FIXME: 오차 있음 
                 if keyword in self.prevrefdata and self.prevrefdata[keyword] != self.refinidata[keyword]:
@@ -124,12 +126,14 @@ class ConversionProject:
         self.resname   = [self.__econfig['convert']['resname'],self.__econfig['convert']['resaltname']]
         self.refname   = self.__econfig['convert']['refini']
 
-        self.fillmode    = os.path.isfile(self.__econfig['update']['dataini'])
+        self.tfilename       = self.__econfig['update']['dataxlsx'].split(",")
+        self.fillmode    = all(os.path.isfile(tmp) for tmp in self.tfilename)
         self.patchmode = os.path.isfile(self.__econfig['update']['newrefini'])
         self._manualsegfname      = self.__econfig['update']['manualseg']
         self._placeholdersegfname = self.__econfig['update']['phseg']
 
         self.excludewords = list(self.__econfig['parse']['excludekeywords'].split(','))
+        self.excludesegs = list(self.__econfig['parse']['excludesegments'].split(','))
         self.splitkeys    = tuple(self.__econfig['parse']['splitsegment'].split(','))
 
     def _load_ini(self,filename):
@@ -140,6 +144,14 @@ class ConversionProject:
         data.read_string(tmp_str)
         
         return data['DEFAULT']
+    def _load_xlsx(self,filename):
+        res = dict()
+        wd = xl.load_workbook(filename,read_only=True,data_only=True)
+        ws = wd.active
+        for rowd in ws.iter_rows(min_row=2):    #starts with 2nd row
+            if rowd[2].value != None:   #if only translated segment exist
+                res[rowd[0].value]=rowd[2].value
+        return res
 
 
 if __name__ == "__main__":
