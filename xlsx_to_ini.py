@@ -2,6 +2,18 @@ import sys
 import os
 import configparser
 import openpyxl as xl     #pip install openpyxl needed!
+import re
+
+variableExpr = re.compile(r'\~[a-z]+\([^\)]*\)')
+parameterExpr = re.compile(r'%ls|%s|%S|%i|%I|%u|%d|%[0-9.]*f|%\.\*f')
+def segment_check(orig,targ): #imported from localization.py
+    warningcnt=errorcnt=0
+    if set(variableExpr.findall(orig)) != set(variableExpr.findall(targ)):
+        warningcnt = 1
+    if parameterExpr.findall(orig) != parameterExpr.findall(targ):
+        errorcnt = 1
+
+    return (warningcnt,errorcnt)
 
 def main(args):
     if __name__ != "__main__":
@@ -18,7 +30,8 @@ def main(args):
     excludekeywords = list(globalconfig['parse']['excludekeywords'].split(','))
 
     origindata,transdata,phdata={},{},{}
-    overwrited,nodata,excluded=0,0,0
+    overwrited,nodata,excluded,variableError,parameterError=0,0,0,0,0
+    warn_notrans=0    #flag for mpull.log
     
     for doc in docs:
         if len(docs) > 1:
@@ -60,6 +73,13 @@ def main(args):
         for keyword in origindata['DEFAULT']:
             if '﻿' in keyword: keyword = keyword.replace("﻿","")
             if keyword in transdata and transdata[keyword] != None:
+                tmp_warning,tmp_error = segment_check(origindata['DEFAULT'][keyword],transdata[keyword])
+                if tmp_warning:
+                    log.write(f"Warning : Variable Format is not matched at \'{keyword}\'\n")
+                if tmp_error:
+                    log.write(f"Error : Parameter Format is not matched at \'{keyword}\'\n")
+                variableError+=tmp_warning
+                parameterError+=tmp_error
                 f.write(keyword+'='+transdata[keyword]+'\n')
             else:   #doesn't exist in smartcat data
                 #print(f"Warning : No translated data of '{keyword}', write original data instead.")
@@ -71,7 +91,7 @@ def main(args):
                 if any(tmp in origindata['DEFAULT'][keyword] for tmp in excludekeywords) :
                     excluded+=1
                     continue
-                log.write(f"Warning : No translated data of '{keyword}', write original data instead.\n")
+                if warn_notrans: log.write(f"Warning : No translated data of '{keyword}', write original data instead.\n")
                 nodata+=1
 
         for keyword in mndata['DEFAULT']:
@@ -93,6 +113,9 @@ def main(args):
         print(f"Merge successfully done with skipping {excluded} placeholders")
     if decnt>0:
         print("There are depreciated keywords on translated data. please check depreciated_keywords.log file.")
-
+    if variableError>0:
+        print(f"There are {variableError} warnings in segments. check mpull.log file.")
+    if parameterError>0:
+        print(f"There are {parameterError} errors in segments. check mpull.log file.")
 if __name__ == "__main__":
     sys.exit(main(sys.argv))
