@@ -38,8 +38,8 @@ class SmartCAT(object):
         <Response [200]>
     """
 
-    SERVER_USA = 'https://us.smartcat.ai'
-    SERVER_EUROPE = 'https://smartcat.ai'
+    SERVER_USA = "https://us.smartcat.ai"
+    SERVER_EUROPE = "https://smartcat.ai"
 
     def __init__(self, username, password, server_url=SERVER_EUROPE):
         """
@@ -68,7 +68,7 @@ class SmartCAT(object):
         if self._project is not None:
             return self._project
 
-        self._project = self._create_api_resource('Project')
+        self._project = self._create_api_resource("Project")
 
         return self._project
 
@@ -82,7 +82,7 @@ class SmartCAT(object):
         if self._document is not None:
             return self._document
 
-        self._document = self._create_api_resource('Document')
+        self._document = self._create_api_resource("Document")
         return self._document
 
     def _create_api_resource(self, resource):
@@ -99,7 +99,7 @@ class BaseResource(object):
     def __init__(self, username, password, server):
         self.session = requests.Session()
         self.session.auth = (username, password)
-        self.session.headers.update({'Accept': 'application/json'})
+        self.session.headers.update({"Accept": "application/json"})
         self.server = server
 
     def send_get_request(self, path, **kwargs):
@@ -132,7 +132,6 @@ class BaseResource(object):
 
 
 class Project(BaseResource):
-
     def create(self, data, files=None):
         # type: (dict) -> requests.Response
         """Create a new project
@@ -150,11 +149,9 @@ class Project(BaseResource):
         if files is None:
             files = {}
 
-        files["model"] = (None, json.dumps(data), 'application/json')
+        files["model"] = (None, json.dumps(data), "application/json")
 
-        return self.send_post_request(
-            '/api/integration/v1/project/create',
-            files=files)
+        return self.send_post_request("/api/integration/v1/project/create", files=files)
 
     def update(self, id, data):
         """Update project by id
@@ -165,9 +162,7 @@ class Project(BaseResource):
         :return: :class:`Response <Response>` object
         :rtype: requests.Response
         """
-        return self.send_put_request(
-            '/api/integration/v1/project/%s' % id,
-            json=data)
+        return self.send_put_request("/api/integration/v1/project/%s" % id, json=data)
 
     def delete(self, id):
         """Delete project
@@ -176,7 +171,7 @@ class Project(BaseResource):
         :return: :class:`Response <Response>` object
         :rtype: requests.Response
         """
-        return self.send_delete_request('/api/integration/v1/project/%s' % id)
+        return self.send_delete_request("/api/integration/v1/project/%s" % id)
 
     def cancel(self, id):
         """Cancel the project
@@ -187,8 +182,8 @@ class Project(BaseResource):
         """
 
         return self.send_post_request(
-            '/api/integration/v1/project/cancel',
-            params={'projectId': id})
+            "/api/integration/v1/project/cancel", params={"projectId": id}
+        )
 
     def restore(self, id):
         """Restore the project
@@ -199,8 +194,8 @@ class Project(BaseResource):
         """
 
         return self.send_post_request(
-            '/api/integration/v1/project/restore',
-            params={'projectId': id})
+            "/api/integration/v1/project/restore", params={"projectId": id}
+        )
 
     def get(self, id):
         """Get project
@@ -209,7 +204,7 @@ class Project(BaseResource):
         :return: :class:`Response <Response>` object
         :rtype: requests.Response
         """
-        return self.send_get_request('/api/integration/v1/project/%s' % id)
+        return self.send_get_request("/api/integration/v1/project/%s" % id)
 
     def completed_work_statistics(self, id):
         """Receiving statistics for the completed parts of the project.
@@ -218,7 +213,9 @@ class Project(BaseResource):
         :return: :class:`Response <Response>` object
         :rtype: requests.Response
         """
-        return self.send_get_request('/api/integration/v1/project/%s/completedWorkStatistics' % id)
+        return self.send_get_request(
+            "/api/integration/v1/project/%s/completedWorkStatistics" % id
+        )
 
     def get_all(self):
         """Adds document to project.
@@ -226,7 +223,7 @@ class Project(BaseResource):
         :return: :class:`Response <Response>` object
         :rtype: requests.Response
         """
-        return self.send_get_request('/api/integration/v1/project/list')
+        return self.send_get_request("/api/integration/v1/project/list")
 
     def attach_document(self, id, files):
         """Adds document to project.
@@ -241,8 +238,10 @@ class Project(BaseResource):
         :return: :class:`Response <Response>` object
         :rtype: requests.Response
         """
-        params = {'projectId': id}
-        return self.send_post_request('/api/integration/v1/project/document', files=files, params=params)
+        params = {"projectId": id}
+        return self.send_post_request(
+            "/api/integration/v1/project/document", files=files, params=params
+        )
 
     def add_target_lang(self, id, lang):
         """Add a new target language to the project
@@ -254,8 +253,9 @@ class Project(BaseResource):
         """
 
         return self.send_post_request(
-            '/api/integration/v1/project/language',
-            params={'projectId': id, 'targetLanguage': lang})
+            "/api/integration/v1/project/language",
+            params={"projectId": id, "targetLanguage": lang},
+        )
 
 
 class Document(BaseResource):
@@ -275,9 +275,10 @@ class Document(BaseResource):
         todo:: implement updateDocumentModel
         """
         return self.send_put_request(
-            '/api/integration/v1/document/update',
+            "/api/integration/v1/document/update",
             files=files,
-            params={'documentId': document_id})
+            params={"documentId": document_id},
+        )
 
     def rename(self, id, name):
         """Renames document
@@ -289,8 +290,9 @@ class Document(BaseResource):
         """
 
         return self.send_put_request(
-            '/api/integration/v1/document/rename',
-            params={'documentId': id, 'name': name})
+            "/api/integration/v1/document/rename",
+            params={"documentId": id, "name": name},
+        )
 
     def get_translation_status(self, id):
         """Receive the status of adding document translation.
@@ -299,8 +301,8 @@ class Document(BaseResource):
         :rtype: requests.Response
         """
         return self.send_get_request(
-            '/api/integration/v1/document/translate/status',
-            params={'documentId': id})
+            "/api/integration/v1/document/translate/status", params={"documentId": id}
+        )
 
     def translate(self, id, files):
         """Translate the selected document using the uploaded translation file.
@@ -322,11 +324,12 @@ class Document(BaseResource):
         """
 
         return self.send_put_request(
-            '/api/integration/v1/document/translate',
+            "/api/integration/v1/document/translate",
             files=files,
-            params={'documentId': id})
+            params={"documentId": id},
+        )
 
-    def request_export(self, document_ids, target_type='target'):
+    def request_export(self, document_ids, target_type="target"):
         """Sends task to export transations
 
         :param document_ids: The document identifier string or list of the identifier.
@@ -337,16 +340,17 @@ class Document(BaseResource):
         if isinstance(document_ids, str):
             document_ids = [document_ids]
 
-        params = {
-            'documentIds': '\n'.join(document_ids),
-            'type': target_type
-        }
+        params = {"documentIds": "\n".join(document_ids), "type": target_type}
 
-        return self.send_post_request('/api/integration/v1/document/export', params=params)
+        return self.send_post_request(
+            "/api/integration/v1/document/export", params=params
+        )
 
     def download_export_result(self, task_id):
         """Download the results of export
 
         :param task_id: The export task identifier
         """
-        return self.send_get_request('/api/integration/v1/document/export/%s' % task_id, stream=True)
+        return self.send_get_request(
+            "/api/integration/v1/document/export/%s" % task_id, stream=True
+        )
