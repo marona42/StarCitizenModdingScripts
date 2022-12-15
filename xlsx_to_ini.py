@@ -3,6 +3,7 @@ import os
 import configparser
 import openpyxl as xl  # pip install openpyxl needed!
 import re
+import datetime
 
 variableExpr = re.compile(r"\~[a-z]+\([^\)]*\)")
 parameterExpr = re.compile(r"%ls|%s|%S|%i|%I|%u|%d|%[0-9.]*f|%\.\*f")
@@ -86,9 +87,7 @@ def main(args):
     mndata.optionxform = str
     mndata.read_string(config_string)
 
-    if os.path.exists("global_pull.ini"):
-        os.rename("global_pull.ini", "global_pull_old.ini")
-    with open("global_pull.ini", "w", encoding="utf​-8-sig") as f:
+    with open("global_pull_" + datetime.date.today().strftime("%y%m%d") + ".ini", "w", encoding="utf​-8-sig") as f:
         for keyword in origindata["DEFAULT"]:
             if "﻿" in keyword:
                 keyword = keyword.replace("﻿", "")
