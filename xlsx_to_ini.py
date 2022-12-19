@@ -87,7 +87,14 @@ def main(args):
     mndata.optionxform = str
     mndata.read_string(config_string)
 
-    with open("global_pull_" + datetime.date.today().strftime("%y%m%d") + ".ini", "w", encoding="utf​-8-sig") as f:
+    pullfilename = "global_pull_" + datetime.date.today().strftime("%y%m%d")
+    if os.path.exists(pullfilename + ".ini"):
+        iternum = 1
+        while os.path.exists(f"{pullfilename}_{iternum}.ini"):
+            iternum += 1
+        pullfilename = pullfilename+"_"+iternum
+
+    with open(pullfilename + ".ini", "w", encoding="utf​-8-sig") as f:
         for keyword in origindata["DEFAULT"]:
             if "﻿" in keyword:
                 keyword = keyword.replace("﻿", "")
