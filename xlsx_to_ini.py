@@ -31,6 +31,8 @@ def main(args):
             smartcat_config["sc_ko_m"]["documentId_1"].split(","),
             smartcat_config["sc_ko_m"]["documentId_2"].split(","),
         ]
+        # if you need manual select for xlsx, comment out above else section and use this line below:
+        # docs = [['a','global_ini_P1'],['a','global_lines_P1']]
 
     log = open("mpull.log", "w")
 
@@ -92,7 +94,7 @@ def main(args):
         iternum = 1
         while os.path.exists(f"{pullfilename}_{iternum}.ini"):
             iternum += 1
-        pullfilename = pullfilename+"_"+iternum
+        pullfilename = pullfilename+"_"+str(iternum)
 
     with open(pullfilename + ".ini", "w", encoding="utf​-8-sig") as f:
         for keyword in origindata["DEFAULT"]:
