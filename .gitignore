@@ -18,3 +18,5 @@ depreciated_keywords.txt
 *.log
 .vscode/
 2350.txt
+translator_statics.pkl
+*.xliff
