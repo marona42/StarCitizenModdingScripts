@@ -71,10 +71,11 @@ class smartCatConfig:
         return set(range(1, len(self.documentIds) + 1))
 
 
-def export_multilang_csv(document_resource, document_id, output_file_name):
+def export_target(document_resource, document_id, output_file_name,type="target"):
     print(f"Export document: {output_file_name}")
+    extname = {'target':'.xlsx','xliff':'.xliff','multilang_Csv':'', 'DocumentWithMetadata':'.xliff'}
     with document_resource.request_export(
-        document_ids=document_id, target_type="multilang_Csv"
+        document_ids=document_id, target_type=type
     ) as export_result:
         if export_result.status_code != 200:
             print("Error: Failed request status code - ", export_result.status_code)
@@ -93,56 +94,7 @@ def export_multilang_csv(document_resource, document_id, output_file_name):
                             print("")
                         wait_download_ready = False
                         print("Download started")
-                        with open(output_file_name, "wb") as out_file:
-                            for chunk in download_result.iter_content(chunk_size=8192):
-                                out_file.write(chunk)
-                        print("Download completed")
-                        break
-                    elif download_result.status_code == 204:
-                        if wait_download_ready:
-                            print(".", end="")
-                        else:
-                            print("Wait download ready", end="")
-                            wait_download_ready = True
-                        time.sleep(1)
-                    else:
-                        if wait_download_ready:
-                            print("")
-                        print(
-                            "Error: export status code - ", download_result.status_code
-                        )
-                        return 1
-        except:
-            if wait_download_ready:
-                print("")
-            raise
-        print("Export completed")
-        return 0
-
-
-def export_target(document_resource, document_id, output_file_name):
-    print(f"Export document: {output_file_name}")
-    with document_resource.request_export(
-        document_ids=document_id, target_type="target"
-    ) as export_result:
-        if export_result.status_code != 200:
-            print("Error: Failed request status code - ", export_result.status_code)
-            return 1
-        print("Export started")
-        export_json = json.loads(export_result.text)
-        export_task_id = export_json["id"]
-        wait_download_ready = False
-        try:
-            while True:
-                with document_resource.download_export_result(
-                    export_task_id
-                ) as download_result:
-                    if download_result.status_code == 200:
-                        if wait_download_ready:
-                            print("")
-                        wait_download_ready = False
-                        print("Download started")
-                        with open(output_file_name + ".xlsx", "wb") as out_file:
+                        with open(output_file_name + extname[type], "wb") as out_file:
                             for chunk in download_result.iter_content(chunk_size=8192):
                                 out_file.write(chunk)
                         print("Download completed")
@@ -203,7 +155,10 @@ def main(args):
         for id in exportDocumentIds:
             documentInfo = smartCAT_config.documentIds[id - 1]
             document_id = documentInfo[0] + "_" + smartCAT_config.languageId
-            result = export_target(api.document, document_id, documentInfo[1])
+            if len(args) > 2:
+                result = export_target(api.document, document_id, documentInfo[1],args[2])
+            else:
+                result = export_target(api.document, document_id, documentInfo[1])
     except Exception as err:
         print("Error: Failed export: {0}".format(err))
     except KeyboardInterrupt as err:
