@@ -20,3 +20,5 @@ depreciated_keywords.txt
 2350.txt
 translator_statics.pkl
 *.xliff
+*.pkl
+propotions/
