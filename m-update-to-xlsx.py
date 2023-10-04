@@ -57,6 +57,7 @@ class ConversionProject:
                 self.refinidata[keyword] == ""
                 or any(tmp in self.refinidata[keyword] for tmp in self.excludewords)
                 or any(keyword.startswith(tmp) for tmp in self.excludesegs)
+                or keyword.endswith(',P')       # New Placeholder format since 3.20 
             ):
                 continue  # exclude including excludekeywords/segs and empty segments
 
