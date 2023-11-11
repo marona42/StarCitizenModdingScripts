@@ -1,3 +1,4 @@
+# read global_ref.ini and global_ini_pull, global_lines_pull.xlsx file
 import os.path
 import configparser
 import openpyxl as xl  # pip install openpyxl needed!
@@ -39,6 +40,7 @@ class ConversionProject:
         # os.rename(self.__econfig['update']['newrefini'],'global_ref.ini')
 
     def write_xlsx(self, dot=100):
+        '''writes read data and fills to xlsx'''
         print("write start")
         xlswb = [[xl.workbook.Workbook()], [xl.workbook.Workbook()]]  # primary, alt
         xlscnt = [1, 1]
@@ -173,6 +175,7 @@ class ConversionProject:
                 )
 
     def write_info(self, filename, title, dat, keyworddic=None):
+        '''generate log file by parameters'''
         with open(filename + ".log", "a") as f:
             if dat == "":
                 f.write(f"{title}\n")
@@ -196,6 +199,7 @@ class ConversionProject:
             f.write("\n\n")
 
     def _load_config(self):
+        '''read mconfig.ini and sets environments settings'''
         self.__econfig = configparser.ConfigParser(
             delimiters="=", strict=True, interpolation=None
         )

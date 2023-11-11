@@ -1,4 +1,5 @@
 # pull from smartcat project to baked ini file.
+# pull from smartcat by downloading .xlsx file, and then convert it to .ini file.
 # requires export-smartcat.py, smartcat.ini
 import sys
 import export_smartcat

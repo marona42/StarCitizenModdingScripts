@@ -1,3 +1,4 @@
+# Caculate user propotion by counting editors from smartcat's exported *.xliff files
 import xml.etree.ElementTree as ET
 import sys
 import os
@@ -5,7 +6,7 @@ import pickle
 import export_smartcat
 
 def load_data():
-    '''loads previous statistics from dumped data'''
+    '''loads previous statistics from dumped data(translator_statics.pkl file)'''
     try:
         with open('translator_statics.pkl', 'rb') as f:
             return pickle.load(f)
