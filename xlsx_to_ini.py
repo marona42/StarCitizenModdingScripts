@@ -42,6 +42,11 @@ def main(args):
     globalconfig.read("mconfig.ini")  # load settings ini file
     excludekeywords = list(globalconfig["parse"]["excludekeywords"].split(","))
 
+    ## read 3dkeyword.txt for exclude
+    with open("3dkeyword.txt","r") as f:
+        keywords_for_3d = f.read().split('\n')
+    #print(keywords_for_3d)
+
     origindata, transdata, phdata = {}, {}, {}
     overwrited, nodata, excluded, variableError, parameterError = 0, 0, 0, 0, 0
     warn_notrans = 0  # flag for mpull.log
@@ -100,7 +105,8 @@ def main(args):
         for keyword in origindata["DEFAULT"]:
             if "﻿" in keyword:
                 keyword = keyword.replace("﻿", "")
-            if keyword in transdata and transdata[keyword] != None:
+            if keyword in transdata and transdata[keyword] != None and \
+            not any(keyword3d in keyword for keyword3d in keywords_for_3d): #remain english for 3d glyphs. temporary solution.
                 tmp_warning, tmp_error = segment_check(
                     origindata["DEFAULT"][keyword], transdata[keyword]
                 )
